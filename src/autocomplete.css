@@ -1,9 +1,24 @@
 @import "tailwindcss";
 
 .autocomplete-container {
-  max-width: 1280px;
+  max-width: 3600px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
   background-color: #ffffff;
+}
+
+.autocomplete-label {
+  font-size: 16px;
+  margin-bottom: 1rem;
+}
+
+.autocomplete-label-container {
+  display: flex;
+  justify-content: left;
+}
+
+.autocomplete-description-container {
+  display: flex;
+  justify-content: left;
+  margin-top: 1rem;
 }
