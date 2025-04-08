@@ -129,6 +129,7 @@ function Autocomplete<T extends string | object>({
             onNavigate: setActiveIndex,
             virtual: true,
             loop: true,
+            allowEscape: true,
         });
 
         const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions(
@@ -158,7 +159,34 @@ function Autocomplete<T extends string | object>({
                         onInputChange?.(value);
                         setIsOpen(true);
                         setActiveIndex(0);
-                      }
+                      },
+                      onKeyDown: (e) => {
+                        if (e.key === 'Enter' && isOpen && activeIndex !== null) {
+                          e.preventDefault(); // Prevent form submission or default behavior
+                          const option = filteredOptions[activeIndex];
+                  
+                          if (option) {
+                            if (multiple) {
+                              setSelectedValues((prev) => {
+                                const index = prev.findIndex(
+                                  (v) => JSON.stringify(v) === JSON.stringify(option)
+                                );
+                                const newValues =
+                                  index >= 0
+                                    ? prev.filter((_, i) => i !== index)
+                                    : [...prev, option];
+                                onChange?.(newValues);
+                                return newValues;
+                              });
+                            } else {
+                              onChange?.(option);
+                              setIsOpen(false);
+                            }
+                            // Refocus the input field
+                            refs.domReference.current?.focus();
+                          }
+                        }
+                      },
                   })}
               />
               {loadingState &&(
