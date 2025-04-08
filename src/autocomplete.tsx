@@ -76,7 +76,9 @@ function Autocomplete<T extends string | object>({
     } : AutocompleteProps<T>) {
         const [isOpen, setIsOpen] = useState(false);
         const [activeIndex, setActiveIndex] = useState<number | null>(null);
-        const [selectedValues, setSelectedValues] = useState<T[]>([]);
+        const [selectedValues, setSelectedValues] = useState<T[]>(
+          multiple && value ? (Array.isArray(value) ? value : [value]) : []
+        );
         const [inputValue, setInputValue] = useState('');
         const [filteredOptions, setFilteredOptions] = useState<T[]>(options);
         const [loadingState, setLoadingState] = useState(false);
