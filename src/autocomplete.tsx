@@ -17,7 +17,7 @@ import {
 interface AutocompleteProps <T extends string | object> {
     description?: string;
     disabled?: boolean;
-    filterOptions?: (options: T[], state: { inputValue: string }) => string[];
+    filterOptions?: (options: T[], state: { inputValue: string }) => T[];
     label?: string;
     loading?: boolean;
     multiple?: boolean;
@@ -77,6 +77,7 @@ function Autocomplete<T extends string | object>({
         const[isOpen, setIsOpen] = useState(false);
         const [activeIndex, setActiveIndex] = useState<number | null>(null);
         const [selectedValues, setSelectedValues] = useState<T[]>([]);
+        const [inputValue, setInputValue] = useState('');
 
 
         const listRef = useRef<Array<HTMLElement | null>>([]);
@@ -116,6 +117,17 @@ function Autocomplete<T extends string | object>({
             setIsOpen(true);
             setActiveIndex(0);
         }
+
+        const filteredOptions =
+          filterOptions?.(options, { inputValue }) ??
+          options.filter(option =>
+            (typeof option === 'string'
+              ? option
+              : JSON.stringify(option)
+            )
+              .toLowerCase()
+              .includes(inputValue.toLowerCase())
+          );
         
     return (
         <div className="autocomplete-container">
@@ -128,12 +140,13 @@ function Autocomplete<T extends string | object>({
                     onClick: handleInputClick,
                     disabled,
                     placeholder,
-                    // onChange: (e: { target: { value: string; }; }) => {
-                    //     if (onInputChange) {
-                    //         onInputChange(e.target.value);
-                    //     }
-                    //     setIsOpen(true);
-                    // },
+                    onChange: (e) => {
+                      const value = (e.target as HTMLInputElement).value;
+                      setInputValue(value);
+                      onInputChange?.(value);
+                      setIsOpen(true);
+                      setActiveIndex(0);
+                    }
                 })}
             />
             {isOpen && (
@@ -154,7 +167,7 @@ function Autocomplete<T extends string | object>({
                     },
                 })}
                 >
-                {options.map((option, index) => (
+                {filteredOptions.map((option, index) => (
                     <Item
                     {...getItemProps({
                         key: typeof option === 'object' ? JSON.stringify(option) : option,
