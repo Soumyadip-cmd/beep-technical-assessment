@@ -19,7 +19,7 @@ function App() {
         }
         value={['apple']}
         multiple={true}
-        loading={false}
+        loading={true}
         disabled={false}
       />
     </>

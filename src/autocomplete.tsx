@@ -1,4 +1,4 @@
-import React, { useState, useRef, forwardRef } from 'react';
+import React, { useState, useRef, forwardRef, useEffect } from 'react';
 import './autocomplete.css'
 import { 
     useRole,
@@ -74,11 +74,33 @@ function Autocomplete<T extends string | object>({
     renderOption,
     value,
     } : AutocompleteProps<T>) {
-        const[isOpen, setIsOpen] = useState(false);
+        const [isOpen, setIsOpen] = useState(false);
         const [activeIndex, setActiveIndex] = useState<number | null>(null);
         const [selectedValues, setSelectedValues] = useState<T[]>([]);
         const [inputValue, setInputValue] = useState('');
+        const [filteredOptions, setFilteredOptions] = useState<T[]>(options);
+        const [loadingState, setLoadingState] = useState(false);
+        const debounceDelay = 1000; // milliseconds
 
+        useEffect(() => {
+          if (!loading) {
+            // No debounce needed
+            const result = filterOptions?.(options, { inputValue }) ?? options;
+            setFilteredOptions(result);
+            return;
+          }
+          
+          setLoadingState(true);
+          const handler = setTimeout(() => {
+            const result = filterOptions?.(options, { inputValue }) ?? options;
+            setFilteredOptions(result);
+            setLoadingState(false);
+          }, debounceDelay);
+        
+          return () => {
+            clearTimeout(handler); // Clean up if user types again quickly
+          };
+        }, [inputValue, options, filterOptions, loading]);
 
         const listRef = useRef<Array<HTMLElement | null>>([]);
 
@@ -117,38 +139,32 @@ function Autocomplete<T extends string | object>({
             setIsOpen(true);
             setActiveIndex(0);
         }
-
-        const filteredOptions =
-          filterOptions?.(options, { inputValue }) ??
-          options.filter(option =>
-            (typeof option === 'string'
-              ? option
-              : JSON.stringify(option)
-            )
-              .toLowerCase()
-              .includes(inputValue.toLowerCase())
-          );
         
     return (
         <div className="autocomplete-container">
             <div className='autocomplete-label-container'>
                 {label && <label className="autocomplete-label">{label}</label>}
             </div>
-            <input className='autocomplete-input'
-                {...getReferenceProps({
-                    ref: refs.setReference,
-                    onClick: handleInputClick,
-                    disabled,
-                    placeholder,
-                    onChange: (e) => {
-                      const value = (e.target as HTMLInputElement).value;
-                      setInputValue(value);
-                      onInputChange?.(value);
-                      setIsOpen(true);
-                      setActiveIndex(0);
-                    }
-                })}
-            />
+            <div className='autocomplete-input-container'>
+              <input className='autocomplete-input'
+                  {...getReferenceProps({
+                      ref: refs.setReference,
+                      onClick: handleInputClick,
+                      disabled,
+                      placeholder,
+                      onChange: (e) => {
+                        const value = (e.target as HTMLInputElement).value;
+                        setInputValue(value);
+                        onInputChange?.(value);
+                        setIsOpen(true);
+                        setActiveIndex(0);
+                      }
+                  })}
+              />
+              {loadingState &&(
+                <span className="autocomplete-loading-spinner" />
+                )}
+            </div>
             {isOpen && (
             <FloatingPortal>
             <FloatingFocusManager
