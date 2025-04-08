@@ -1,19 +1,24 @@
-import React, { useState, useRef, forwardRef, useEffect } from 'react';
-import './autocomplete.css'
-import { 
-    useRole,
-    useDismiss,
-    useListNavigation,
+import React, { forwardRef, useEffect, useRef, useState } from 'react';
+import tailwindcss from '@tailwindcss/vite';
+import "./autocomplete.css"
+import {
+    autoUpdate,
     flip,
     size,
+    useDismiss,
     useFloating,
-    autoUpdate,
+    useId,
     useInteractions,
+    useListNavigation,
+    useRole,
     FloatingPortal,
     FloatingFocusManager,
-    useId
  } from '@floating-ui/react';
 
+ /**
+ * Props for the Autocomplete component.
+ * @template T Type of the options, can be string or object.
+ */
 interface AutocompleteProps <T extends string | object> {
     description?: string;
     disabled?: boolean;
@@ -29,11 +34,17 @@ interface AutocompleteProps <T extends string | object> {
     value?: T | T[];
 }
 
+/**
+ * Props for individual list item components.
+ */
 interface ItemProps {
     children: React.ReactNode;
     active: boolean;
   }
 
+/**
+ * A single option item within the autocomplete dropdown.
+ */
 const Item = forwardRef<
   HTMLDivElement,
   ItemProps & React.HTMLProps<HTMLDivElement>
@@ -60,6 +71,10 @@ const Item = forwardRef<
   );
 });
 
+/**
+ * Autocomplete component allowing single or multiple item selection with optional filtering.
+ * @template T Type of the options.
+ */
 function Autocomplete<T extends string | object>({
     description,
     disabled = false,
@@ -84,14 +99,16 @@ function Autocomplete<T extends string | object>({
         const [loadingState, setLoadingState] = useState(false);
         const debounceDelay = 1000; // milliseconds
 
+        // useEffect to handle input changes and debounce filtering logic
         useEffect(() => {
+          // If not loading, filter options immediately
           if (!loading) {
-            // No debounce needed
             const result = filterOptions?.(options, { inputValue }) ?? options;
             setFilteredOptions(result);
             return;
           }
-          
+
+          // If loading, debounce the filtering logic
           setLoadingState(true);
           const handler = setTimeout(() => {
             const result = filterOptions?.(options, { inputValue }) ?? options;
@@ -100,7 +117,7 @@ function Autocomplete<T extends string | object>({
           }, debounceDelay);
         
           return () => {
-            clearTimeout(handler); // Clean up if user types again quickly
+            clearTimeout(handler);
           };
         }, [inputValue, options, filterOptions, loading]);
 
@@ -144,12 +161,12 @@ function Autocomplete<T extends string | object>({
         }
         
     return (
-        <div className="autocomplete-container">
-            <div className='autocomplete-label-container'>
-                {label && <label className="autocomplete-label">{label}</label>}
+        <div className="max-w-[3600px] mx-auto p-8 bg-white rounded shadow-md">
+            <div className='flex justify-start'>
+                {label && <label className="text-base mb-4">{label}</label>}
             </div>
-            <div className='autocomplete-input-container'>
-              <input className='autocomplete-input'
+            <div className='relative flex items-center '>
+              <input className='w-full p-2 border border-gray-300 rounded text-base focus:outline-none focus:border-blue-500'
                   {...getReferenceProps({
                       ref: refs.setReference,
                       onClick: handleInputClick,
@@ -164,7 +181,7 @@ function Autocomplete<T extends string | object>({
                       },
                       onKeyDown: (e) => {
                         if (e.key === 'Enter' && isOpen && activeIndex !== null) {
-                          e.preventDefault(); // Prevent form submission or default behavior
+                          e.preventDefault();
                           const option = filteredOptions[activeIndex];
                   
                           if (option) {
@@ -184,7 +201,7 @@ function Autocomplete<T extends string | object>({
                               onChange?.(option);
                               setIsOpen(false);
                             }
-                            // Refocus the input field
+                            
                             refs.domReference.current?.focus();
                           }
                         }
@@ -192,7 +209,7 @@ function Autocomplete<T extends string | object>({
                   })}
               />
               {loadingState &&(
-                <span className="autocomplete-loading-spinner" />
+                <span className="absolute right-2 w-4 h-4 border-2 border-gray-300 border-t-gray-800 rounded-full animate-spin" />
                 )}
             </div>
             {isOpen && (
@@ -225,8 +242,8 @@ function Autocomplete<T extends string | object>({
                               setSelectedValues((prev) => {
                                 const index = prev.findIndex(v => JSON.stringify(v) === JSON.stringify(option));
                                 const newValues = index >= 0
-                                  ? prev.filter((_, i) => i !== index) // remove
-                                  : [...prev, option]; // add
+                                  ? prev.filter((_, i) => i !== index) // deselect
+                                  : [...prev, option]; // select
                           
                                 onChange?.(newValues);
                                 return newValues;
@@ -258,7 +275,7 @@ function Autocomplete<T extends string | object>({
             </FloatingFocusManager>
             </FloatingPortal>
         )}
-            <div className="autocomplete-description-container">
+            <div className="flex justify-start mt-4">
                 {description && <p className="autocomplete-description">{description}</p>}
             </div>
         </div>
