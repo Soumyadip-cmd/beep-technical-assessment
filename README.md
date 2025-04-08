@@ -1,54 +1,23 @@
-# React + TypeScript + Vite
+# React Autocomplete Component
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A customizable and accessible autocomplete input component built with React, TypeScript, and @floating-ui/react. Supports both single and multiple selection modes, optional loading state, filtered options, and fully customizable rendering for each option.
 
-Currently, two official plugins are available:
+## Controls
+- Clicking on the component opens up the options window and focuses on the search input.
+- Clicking on an option will (de)select the option.
+- When the options window is open, clicking outside the component will cause the window to close and unfocus the search input
+- Options can be iterated through via Up and Down Arrow Keys, and should be  “loop around” at the start and end.
+- Option can be (de)selected via the Enter Key.
+- The options window can be closed via the Escape Key.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Component Usage
+- Synchronous autocomplete with single and multiple option(s) selection.
+- Debounced search, i.e. filtering of displayed options only occurs after typing has 
+ceased for a specified amount of time
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+## How to use the component
+1. Install component as dependency: npm install github:soumyadip-cmd/beep-technical-assessment
+1. Assuming file is located at src/components/Autocomplete.tsx, include the following in your imports:
+```typescript
+import Autocomplete from 'your-repo-name/src/components/Autocomplete';
 ```
